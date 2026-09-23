@@ -1,0 +1,32 @@
+{%- comment -%}
+  Renders a price with an optional compare-at price and a savings label.
+  Accepts:
+    label             - string, optional small heading above the price (e.g. "Any 2 products")
+    price             - number, in the shop's currency subunit-free form (e.g. from a metaobject money field)
+    compare_at_price  - number, optional
+    savings_label     - string, optional override (e.g. "33% off" or "Save ₹249").
+                         If not supplied and compare_at_price exists, a "X% off" is computed.
+    layout            - 'tag' (hero-style card) | 'inline' (product card style)
+{%- endcomment -%}
+
+{%- if savings_label == blank and compare_at_price and compare_at_price > price -%}
+  {%- assign pct = compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price -%}
+  {%- assign savings_label = pct | round | append: '% off' -%}
+{%- endif -%}
+
+{%- if layout == 'tag' -%}
+  <span class="price-tag price-tag--card">
+    {%- if label != blank -%}<span class="price-tag__label">{{ label }}</span>{%- endif -%}
+    <span class="price-tag__val">
+      <strong>{{ price | times: 100 | money }}</strong>
+      {%- if compare_at_price -%}<s>{{ compare_at_price | times: 100 | money }}</s>{%- endif -%}
+    </span>
+    {%- if savings_label != blank -%}<span class="price-tag__cut">{{ savings_label }}</span>{%- endif -%}
+  </span>
+{%- else -%}
+  <span class="price-tag price-tag--inline">
+    <strong>{{ price | times: 100 | money }}</strong>
+    {%- if compare_at_price -%}<s>{{ compare_at_price | times: 100 | money }}</s>{%- endif -%}
+    {%- if savings_label != blank -%}<em>{{ savings_label }}</em>{%- endif -%}
+  </span>
+{%- endif -%}
