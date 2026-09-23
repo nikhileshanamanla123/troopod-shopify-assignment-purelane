@@ -1,0 +1,162 @@
+{{ 'section-hero.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign tier_blocks = section.blocks | where: 'type', 'bundle_tier'
+  assign badge_blocks = section.blocks | where: 'type', 'badge'
+-%}
+
+<section class="hero" id="hero-{{ section.id }}">
+  <div class="hero-grid">
+
+    {%- if badge_blocks.size > 0 -%}
+      <div class="badges glass-2 hero__badge-rail" aria-label="Product promises">
+        {%- for block in badge_blocks -%}
+          <div class="badge" {{ block.shopify_attributes }}>
+            {%- render 'icon-badge', icon: block.settings.icon, label: block.settings.label -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    <div class="hero-copy">
+      <h1 class="d1 hero__heading">
+        {{- section.settings.heading_line_1 -}}<br>
+        {{- section.settings.heading_line_2 -}}<br>
+        <span class="lime">{{ section.settings.heading_highlight }}</span>
+      </h1>
+
+      <div class="rule">
+        <i></i>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c0-6.5 3.5-11 8-12.5C20 15 16.5 20 12 21Z"/><path d="M12 21C12 14.5 8.5 10 4 8.5 4 15 7.5 20 12 21Z"/></svg>
+        <i></i>
+      </div>
+
+      {%- if section.settings.subheading != blank -%}
+        <div class="lede">{{ section.settings.subheading }}</div>
+      {%- endif -%}
+
+      <div class="hero-cta">
+        {%- if section.settings.primary_button_label != blank -%}
+          <a class="btn btn-primary" href="{{ section.settings.primary_button_link | default: '#' }}">
+            {{ section.settings.primary_button_label }}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13m-5-6 6 6-6 6"/></svg>
+          </a>
+        {%- endif -%}
+        {%- if section.settings.secondary_button_label != blank -%}
+          <a class="btn btn-ghost" href="{{ section.settings.secondary_button_link | default: '#' }}">{{ section.settings.secondary_button_label }}</a>
+        {%- endif -%}
+      </div>
+
+      {%- if badge_blocks.size > 0 -%}
+        <div class="badgestrip hero__badge-strip">
+          {%- for block in badge_blocks -%}
+            {%- render 'icon-badge', icon: block.settings.icon, label: block.settings.label, class: 'glass-2' -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- if tier_blocks.size > 0 -%}
+      <div class="hero-prod" id="heroProd-{{ section.id }}">
+        <div class="hstage" data-hero-stage>
+          {%- for block in tier_blocks -%}
+            {%- assign tier = block.settings.tier.value -%}
+            {%- if tier == blank -%}{%- continue -%}{%- endif -%}
+            <div class="hslide{% if forloop.first %} on{% endif %}" data-index="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+              {%- assign is_lcp_slide = forloop.first -%}
+              {%- for product in tier.products.value limit: 3 -%}
+                {%- if product and product.featured_image -%}
+                  {%- comment -%} Only the very first image of the first slide is LCP-critical; every other tier image (including other images in this same slide) can lazy-load. {%- endcomment -%}
+                  {%- if is_lcp_slide and forloop.first -%}
+                    {{ product.featured_image | image_url: width: 500 | image_tag: loading: 'eager', fetchpriority: 'high', alt: product.title, class: 'hp', sizes: '(min-width: 900px) 40vw, 80vw', widths: '250,375,500,750' }}
+                  {%- else -%}
+                    {{ product.featured_image | image_url: width: 500 | image_tag: loading: 'lazy', alt: product.title, class: 'hp', sizes: '(min-width: 900px) 40vw, 80vw', widths: '250,375,500,750' }}
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+              <div class="glass-2 ptag">
+                {%- render 'price-tag',
+                  layout: 'tag',
+                  label: tier.label.value,
+                  price: tier.price.value,
+                  compare_at_price: tier.compare_at_price.value,
+                  savings_label: tier.savings_label.value
+                -%}
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+        {%- if tier_blocks.size > 1 -%}
+          <div class="hdots" role="tablist" aria-label="Choose bundle size">
+            {%- for block in tier_blocks -%}
+              <button type="button" class="{% if forloop.first %}on{% endif %}"
+                role="tab" aria-selected="{{ forloop.first }}"
+                aria-label="Show {{ forloop.index }} product{% if forloop.index > 1 %}s{% endif %}"
+                data-goto="{{ forloop.index0 }}"></button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+<script src="{{ 'section-hero.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Hero",
+  "tag": "section",
+  "class": "shopify-section--hero",
+  "settings": [
+    { "type": "text", "id": "heading_line_1", "label": "Heading, line 1", "default": "Clean" },
+    { "type": "text", "id": "heading_line_2", "label": "Heading, line 2", "default": "That" },
+    { "type": "text", "id": "heading_highlight", "label": "Heading, highlighted word", "default": "Lasts" },
+    { "type": "richtext", "id": "subheading", "label": "Subheading" },
+    { "type": "header", "content": "Primary button" },
+    { "type": "text", "id": "primary_button_label", "label": "Label", "default": "Shop now" },
+    { "type": "url", "id": "primary_button_link", "label": "Link" },
+    { "type": "header", "content": "Secondary button" },
+    { "type": "text", "id": "secondary_button_label", "label": "Label", "default": "How it works" },
+    { "type": "url", "id": "secondary_button_link", "label": "Link" }
+  ],
+  "blocks": [
+    {
+      "type": "badge",
+      "name": "Badge",
+      "settings": [
+        { "type": "select", "id": "icon", "label": "Icon", "default": "leaf",
+          "options": [
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "shield", "label": "Shield" },
+            { "value": "sparkle", "label": "Sparkle" }
+          ] },
+        { "type": "text", "id": "label", "label": "Label",
+          "info": "Use a | (pipe) to break onto a second line, e.g. Plant|powered",
+          "default": "Plant|powered" }
+      ]
+    },
+    {
+      "type": "bundle_tier",
+      "name": "Bundle tier (hero carousel slide)",
+      "settings": [
+        { "type": "metaobject", "id": "tier", "label": "Bundle tier",
+          "metaobject_type": "bundle_tier" }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Hero",
+      "blocks": [
+        { "type": "badge" },
+        { "type": "badge", "settings": { "icon": "shield", "label": "Safe for|kids & pets" } },
+        { "type": "badge", "settings": { "icon": "sparkle", "label": "Zero harsh|chemicals" } },
+        { "type": "bundle_tier" }
+      ]
+    }
+  ]
+}
+{% endschema %}
