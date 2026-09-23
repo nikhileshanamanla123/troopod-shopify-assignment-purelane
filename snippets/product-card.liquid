@@ -1,0 +1,77 @@
+{%- comment -%}
+  Renders one product card (image, pill, title, rating, price, add to cart).
+  Accepts:
+    product        - a Shopify product object (required)
+    pill_override  - string, optional. If not passed, derived from product tags
+                     (bestseller / new / top-rated), first match wins.
+    image_loading  - 'eager' | 'lazy' (default 'lazy' - this snippet is used
+                      below the fold in every current caller; pass 'eager'
+                      explicitly if a future caller ever puts it above the fold)
+{%- endcomment -%}
+
+{%- liquid
+  assign image_loading = image_loading | default: 'lazy'
+  assign pill = pill_override
+  if pill == blank
+    if product.tags contains 'bestseller'
+      assign pill = 'Best seller'
+    elsif product.tags contains 'new'
+      assign pill = 'New'
+    elsif product.tags contains 'top-rated'
+      assign pill = 'Top rated'
+    endif
+  endif
+  assign rating = product.metafields.reviews.rating.value
+  assign rating_count = product.metafields.reviews.rating_count.value
+-%}
+
+<article class="glass card{% unless product.available %} card--sold-out{% endunless %}">
+  <div class="shot">
+    {%- if pill != blank -%}
+      <span class="pill">{{ pill }}</span>
+    {%- endif -%}
+    {%- if product.available == false -%}
+      <span class="pill pill--sold-out">Sold out</span>
+    {%- endif -%}
+
+    {%- if product.featured_image -%}
+      {{ product.featured_image | image_url: width: 400 | image_tag:
+        loading: image_loading,
+        alt: product.featured_image.alt | default: product.title,
+        widths: '200,300,400,600',
+        sizes: '(min-width: 860px) 25vw, 50vw'
+      }}
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'card__placeholder' }}
+    {%- endif -%}
+  </div>
+
+  <h4 class="card__title" title="{{ product.title | escape }}">{{ product.title }}</h4>
+
+  {%- if rating and rating_count -%}
+    <div class="rate">
+      <b>&#9733; {{ rating }}</b> &middot; {{ rating_count }} reviews
+    </div>
+  {%- endif -%}
+
+  <div class="pr">
+    {%- render 'price-tag',
+      layout: 'inline',
+      price: product.price | divided_by: 100.0,
+      compare_at_price: product.compare_at_price | divided_by: 100.0
+    -%}
+  </div>
+
+  {%- if product.available -%}
+    <product-form-card class="card__form" data-product-id="{{ product.id }}">
+      <form method="post" action="/cart/add" class="card__add-form">
+        <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+        <button type="submit" class="btn btn-ghost btn-sm" {% if product.selected_or_first_available_variant.available == false %}disabled{% endif %}>
+          Add to cart
+        </button>
+      </form>
+    </product-form-card>
+  {%- else -%}
+    <button type="button" class="btn btn-ghost btn-sm" disabled>Sold out</button>
+  {%- endif -%}
+</article>
