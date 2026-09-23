@@ -1,0 +1,63 @@
+/* Ported from purelane-homepage.html lines ~206-248 & ~994.
+   Scene/water background and header parallax are NOT part of this section
+   (out of the five in-scope sections) - see docs/build-notes.md. */
+
+.hero{position:relative;z-index:2;min-height:100svh;display:flex;align-items:flex-end;padding:150px 0 34px}
+.hero::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(102deg,rgba(1,45,42,.68) 0%,rgba(1,45,42,.40) 30%,rgba(1,45,42,.10) 52%,transparent 66%)}
+@media(max-width:900px){.hero::before{
+  background:linear-gradient(180deg,rgba(1,45,42,.44) 0%,rgba(1,45,42,.22) 34%,rgba(1,40,38,.60) 100%)}}
+.hero-grid{max-width:1180px;margin:0 auto;padding:0 18px;width:100%;position:relative;z-index:2}
+.hero-copy{max-width:600px;position:relative;z-index:3}
+.hero__heading{margin-bottom:20px;text-shadow:0 6px 40px rgba(2,20,19,.55)}
+.hero .rule{display:flex;align-items:center;gap:13px;margin:0 0 20px;max-width:270px}
+.hero .rule i{height:1px;flex:1;background:linear-gradient(90deg,rgba(236,230,247,.44),transparent)}
+.hero .rule svg{width:16px;height:16px;color:var(--accent);flex:0 0 auto}
+.hero-cta{display:flex;gap:11px;flex-wrap:wrap;margin-top:26px}
+
+.hero-prod{position:absolute;right:2%;bottom:28px;width:min(50vw,560px);z-index:2;
+  filter:drop-shadow(0 34px 54px rgba(2,20,19,.6))}
+@media(max-width:1200px){
+  .hero-copy{max-width:470px}
+  .hero-prod{width:min(44vw,440px);right:3%}
+}
+@media(max-width:900px){
+  .hero{align-items:flex-end;padding-top:132px}
+  .hero-copy{max-width:none}
+  .hero-prod{position:relative;right:auto;bottom:auto;width:min(88vw,420px);margin:20px auto 0}
+}
+
+.hero__badge-rail{position:absolute;right:18px;top:50%;transform:translateY(-50%);width:96px;z-index:4;
+  display:flex;flex-direction:column;gap:2px;padding:12px 8px;border-radius:20px}
+.hero__badge-rail .badge{text-align:center;padding:11px 4px}
+.hero__badge-rail .badge+.badge{border-top:1px solid rgba(236,230,247,.14)}
+@media(max-width:900px){.hero__badge-rail{display:none}}
+
+.hero__badge-strip{display:flex;gap:8px;margin-top:24px}
+.hero__badge-strip .icon-badge{flex:1}
+@media(min-width:901px){.hero__badge-strip{display:none}}
+
+.icon-badge{text-align:center;padding:11px 6px;border-radius:14px}
+.icon-badge__icon{width:38px;height:38px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(236,230,247,.10);border:1px solid rgba(236,230,247,.22);color:var(--accent)}
+.icon-badge__icon svg{width:18px;height:18px}
+.icon-badge__label{display:block;font-size:8.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--paper-2);line-height:1.34}
+.hero__badge-rail .icon-badge{padding:0}
+
+/* hero product stage */
+.hstage{position:relative}
+.hslide{position:relative;display:none;align-items:flex-end;justify-content:center;gap:0}
+.hslide.on{display:flex}
+.hslide .hp{max-height:min(52vh,420px);width:auto;object-fit:contain}
+.ptag{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);padding:12px 18px;text-align:center;white-space:nowrap}
+.price-tag--tag .price-tag__label,.ptag .price-tag__label{display:block;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--paper-3);margin-bottom:4px}
+.ptag strong{font-family:'Outfit',sans-serif;font-size:19px;color:var(--surface)}
+.ptag s{font-size:12px;color:var(--paper-3);margin-left:6px}
+.ptag .price-tag__cut{display:block;margin-top:3px;font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--accent)}
+.hdots{display:flex;justify-content:center;gap:8px;margin-top:14px}
+.hdots button{width:8px;height:8px;border-radius:50%;background:rgba(236,230,247,.3);transition:.3s}
+.hdots button.on{width:22px;border-radius:999px;background:var(--accent)}
+
+@media(prefers-reduced-motion:reduce){
+  .hslide{transition:none}
+}
